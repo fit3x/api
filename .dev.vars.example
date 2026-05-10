@@ -1,0 +1,16 @@
+# Copy this file to .dev.vars and fill in real values.
+# .dev.vars is gitignored — never commit secrets.
+
+# Supabase — for JWT verification (asymmetric, via JWKS)
+SUPABASE_PROJECT_URL=https://obmsusdkyoaqwxpqrzgc.supabase.co
+
+# Unkey — for machine-to-machine API keys
+# UNKEY_ROOT_KEY=
+# UNKEY_API_ID=
+
+# Observability
+# SENTRY_DSN=
+# AXIOM_TOKEN=
+# AXIOM_DATASET=fit3x-api
+
+
