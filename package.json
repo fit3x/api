@@ -1,5 +1,5 @@
 {
-  "name": "fit3x-api",
+  "name": "@fit3x/api",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
