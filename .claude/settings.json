@@ -12,7 +12,8 @@
       "Bash(find /Users/robsonjardim/Documents/dev/git-projects/Fit3xGen -maxdepth 2 -type f -name \"package.json\" -o -name \"tsconfig.json\" -o -name \"README.md\" | head -20)",
       "Read(//Users/robsonjardim/Documents/dev/git-projects/Fit3xGen/**)",
       "Bash(find /Users/robsonjardim/Documents/dev/git-projects/Fit3x/docs -type f 2>/dev/null | head -20)",
-      "Read(//Users/robsonjardim/Documents/dev/git-projects/Fit3x/**)"
+      "Read(//Users/robsonjardim/Documents/dev/git-projects/Fit3x/**)",
+      "Bash(pnpm remove *)"
     ],
     "additionalDirectories": [
       "/tmp"

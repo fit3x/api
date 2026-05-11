@@ -2,37 +2,37 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "fit3xapi",
   "main": "src/index.ts",
-  "compatibility_date": "2026-05-10"
-  // "compatibility_flags": [
-  //   "nodejs_compat"
-  // ],
-  // "vars": {
-  //   "MY_VAR": "my-variable"
-  // },
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "MY_KV_NAMESPACE",
-  //     "id": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-  //   }
-  // ],
-  // "r2_buckets": [
-  //   {
-  //     "binding": "MY_BUCKET",
-  //     "bucket_name": "my-bucket"
-  //   }
-  // ],
-  // "d1_databases": [
-  //   {
-  //     "binding": "MY_DB",
-  //     "database_name": "my-database",
-  //     "database_id": ""
-  //   }
-  // ],
-  // "ai": {
-  //   "binding": "AI"
-  // },
-  // "observability": {
-  //   "enabled": true,
-  //   "head_sampling_rate": 1
-  // }
+  "compatibility_date": "2026-05-10",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "env": {
+    "staging": {
+      "name": "fit3xapi-staging",
+      "routes": [
+        { "pattern": "api.staging.app.fit3x.com", "custom_domain": true }
+      ],
+      "vars": {
+        "MOBILE_APP_ORIGINS": ""
+      },
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1
+      }
+    },
+    "production": {
+      "name": "fit3xapi-production",
+      "routes": [
+        { "pattern": "api.app.fit3x.com", "custom_domain": true }
+      ],
+      "vars": {
+        "MOBILE_APP_ORIGINS": ""
+      },
+      "observability": {
+        "enabled": true,
+        "head_sampling_rate": 1
+      }
+    }
+  }
 }
