@@ -1,21 +1,23 @@
-```txt
-npm install
-npm run dev
+# Fit3xAPI
+
+Backend API for the Fit3x ecosystem. See `CLAUDE.md` for architecture and conventions.
+
+## Local development
+
+```bash
+pnpm install
+cp .dev.vars.example .dev.vars  # then fill in secret values
+pnpm dev
 ```
 
-```txt
-npm run deploy
-```
+Server boots at `http://localhost:8787`.
 
-[For generating/synchronizing types based on your Worker configuration run](https://developers.cloudflare.com/workers/wrangler/commands/#types):
+## Scripts
 
-```txt
-npm run cf-typegen
-```
+- `pnpm dev` — local Wrangler dev server with hot reload
+- `pnpm deploy` — deploy to Cloudflare (default env)
+- `pnpm test` — run Vitest suite (added in later commits)
 
-Pass the `CloudflareBindings` as generics when instantiation `Hono`:
+## Stack
 
-```ts
-// src/index.ts
-const app = new Hono<{ Bindings: CloudflareBindings }>()
-```
+Hono · Cloudflare Workers · TypeScript · Zod · Supabase · Unkey
