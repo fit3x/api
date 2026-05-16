@@ -1,0 +1,15 @@
+meta {
+  name: Programs
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/v1/programs
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}

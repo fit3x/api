@@ -1,0 +1,15 @@
+meta {
+  name: Health
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/v1/health
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  baseUrl: api.app.fit3x.com
+}

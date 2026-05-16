@@ -1,0 +1,36 @@
+meta {
+  name: Sign In
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{supabaseUrl}}/auth/v1/token?grant_type=password
+  body: json
+  auth: none
+}
+
+headers {
+  apikey: {{supabaseAnonKey}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{userEmail}}",
+    "password": "{{userPassword}}"
+  }
+}
+
+vars:pre-request {
+  userPassword: @a9s8d7#26
+  userEmail: api@teste.com
+  supabaseUrl: https://obmsusdkyoaqwxpqrzgc.supabase.co
+  supabaseAnonKey: sb_publishable__fT_qHMlnEzTATvv-xJa2A_l78KNHgi
+}
+
+script:post-response {
+  if (res.status === 200 && res.body && res.body.access_token) {
+    bru.setEnvVar("jwt", res.body.access_token);
+  }
+}

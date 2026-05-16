@@ -1,0 +1,43 @@
+meta {
+  name: Sessions Generate
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/v1/sessions/generate
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "version": "1.0.0",
+    "generation_request": {
+      "scope": "single_session",
+      "locale": "en"
+    },
+    "customer_profile": {
+      "user_id": "user-123",
+      "demographics": {
+        "age": 30,
+        "biological_sex": "male"
+      },
+      "training_background": {
+        "experience_level": "intermediate"
+      },
+      "goals": {
+        "primary_goal": "build_muscle"
+      },
+      "constraints": {
+        "available_days_per_week": 4,
+        "session_duration_max_minutes": 60,
+        "equipment_access": "full_gym"
+      }
+    }
+  }
+}
