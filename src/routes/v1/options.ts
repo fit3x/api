@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 
-import { getOptionsBundle } from '../../lib/workout-engine'
+import { getEngineVersion, getOptionsBundle } from '../../lib/workout-engine'
 import { requireSupabaseAuth } from '../../middleware/auth'
 import type { AppEnv } from '../../types/app'
 import {
@@ -29,6 +29,15 @@ optionsRoutes.get('/options', (c) => {
       400,
     )
   }
+
+  const etag = `"options-${getEngineVersion()}-${parsed.data.locale}"`
+  c.header('Cache-Control', 'private, max-age=3600')
+  c.header('ETag', etag)
+
+  if (c.req.header('If-None-Match') === etag) {
+    return c.body(null, 304)
+  }
+
   const body = OptionsBundleResponseSchema.parse({
     ...getOptionsBundle(parsed.data.locale),
     requestId,
