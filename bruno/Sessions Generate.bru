@@ -16,7 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "version": "1.0.0",
+    "version": "2.0.0",
     "generation_request": {
       "scope": "single_session",
       "locale": "en"
@@ -31,12 +31,12 @@ body:json {
         "experience_level": "intermediate"
       },
       "goals": {
-        "primary_goal": "build_muscle"
+        "goals": ["build_muscle"]
       },
       "constraints": {
         "available_days_per_week": 4,
         "session_duration_max_minutes": 60,
-        "equipment_access": "full_gym"
+        "available_equipment": ["barbell", "dumbbell", "cable", "body_weight"]
       }
     }
   }

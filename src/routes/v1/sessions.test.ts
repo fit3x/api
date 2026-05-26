@@ -82,16 +82,16 @@ const minimalValidInput = () => ({
   customer_profile: {
     constraints: {
       available_days_per_week: 4,
-      equipment_access: 'full_gym',
+      available_equipment: ['barbell', 'dumbbell', 'cable', 'body_weight'],
       session_duration_max_minutes: 60,
     },
     demographics: { age: 30, biological_sex: 'male' },
-    goals: { primary_goal: 'build_muscle' },
+    goals: { goals: ['build_muscle'] },
     training_background: { experience_level: 'intermediate' },
     user_id: 'user-123',
   },
   generation_request: { scope: 'single_session' },
-  version: '1.0.0',
+  version: '2.0.0',
 })
 
 describe('POST /v1/sessions/generate', () => {
@@ -127,7 +127,7 @@ describe('POST /v1/sessions/generate', () => {
       body: JSON.stringify({
         customer_profile: {},
         generation_request: { scope: 'single_session' },
-        version: '1.0.0',
+        version: '2.0.0',
       }),
       headers: {
         Authorization: `Bearer ${token}`,
@@ -147,8 +147,7 @@ describe('POST /v1/sessions/generate', () => {
   it('returns 400 when an enum value is not in the supported set', async () => {
     const token = await mintToken()
     const bad = minimalValidInput()
-    // @ts-expect-error - intentionally invalid enum to test 400 path
-    bad.customer_profile.goals.primary_goal = 'become_a_wizard'
+    bad.customer_profile.goals.goals[0] = 'become_a_wizard'
     const res = await callGenerate({
       body: JSON.stringify(bad),
       headers: {
@@ -176,9 +175,17 @@ describe('POST /v1/sessions/generate', () => {
     const body = (await res.json()) as {
       version: string
       workout_program: { mode: string; id: string }
-      workout_sessions: Array<{ id: string; blocks: unknown[] }>
+      exercises_pool: Record<string, { exercise_id: string; name: string }>
+      workout_sessions: Array<{
+        id: string
+        blocks: Array<{
+          sets: Array<{
+            exercises: Array<{ exercise_ref: Record<string, unknown> }>
+          }>
+        }>
+      }>
       generation_scope: string
-      generation_metadata: { engine_version: string }
+      generation_metadata?: { engine_version?: string }
       requestId: string
     }
     expect(typeof body.version).toBe('string')
@@ -187,7 +194,14 @@ describe('POST /v1/sessions/generate', () => {
     expect(body.workout_sessions.length).toBeGreaterThan(0)
     expect(Array.isArray(body.workout_sessions[0].blocks)).toBe(true)
     expect(body.generation_scope).toBe('single_session')
-    expect(typeof body.generation_metadata.engine_version).toBe('string')
     expect(typeof body.requestId).toBe('string')
+
+    expect(typeof body.exercises_pool).toBe('object')
+    expect(Object.keys(body.exercises_pool).length).toBeGreaterThan(0)
+
+    const firstSet = body.workout_sessions[0].blocks[0].sets[0]
+    const ref = firstSet.exercises[0].exercise_ref
+    expect(Object.keys(ref)).toEqual(['exercise_id'])
+    expect(body.exercises_pool[ref.exercise_id as string]).toBeDefined()
   })
 })

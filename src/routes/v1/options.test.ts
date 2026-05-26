@@ -99,7 +99,7 @@ describe('GET /v1/options', () => {
     expect(body.error?.code).toBe('bad_request')
   })
 
-  it('returns 200 with all 14 option lists when no locale is given (default en)', async () => {
+  it('returns 200 with all 12 option lists when no locale is given (default en)', async () => {
     const token = await mintToken()
     const res = await callOptions('/v1/options', {
       headers: { Authorization: `Bearer ${token}` },
@@ -121,10 +121,8 @@ describe('GET /v1/options', () => {
       'biologicalSexes',
       'blockTypes',
       'bodyParts',
-      'canonicalGoals',
       'conditions',
       'equipment',
-      'equipmentAccess',
       'excludableBlocks',
       'experienceLevels',
       'goals',

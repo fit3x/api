@@ -16,15 +16,6 @@ export const ExperienceLevelSchema = z.enum([
   'elite',
 ])
 
-export const EquipmentAccessProfileSchema = z.enum([
-  'full_gym',
-  'home_basic',
-  'home_advanced',
-  'bodyweight_only',
-  'hotel_gym',
-  'outdoor',
-])
-
 export const SplitTypeSchema = z.enum([
   'full_body',
   'upper_lower',
@@ -32,17 +23,6 @@ export const SplitTypeSchema = z.enum([
   'muscle_group_split',
   'hybrid_athletic',
   'movement_pattern',
-])
-
-export const CanonicalGoalSchema = z.enum([
-  'hypertrophy',
-  'strength',
-  'power',
-  'endurance',
-  'fat_loss',
-  'general_fitness',
-  'sport_specific',
-  'rehabilitation',
 ])
 
 export const UserGoalSchema = z.enum([
@@ -308,10 +288,8 @@ export const OptionsBundleResponseSchema = z.object({
   biologicalSexes: z.array(InputOptionSchema),
   blockTypes: z.array(InputOptionSchema),
   bodyParts: z.array(InputOptionSchema),
-  canonicalGoals: z.array(InputOptionSchema),
   conditions: z.array(InputOptionSchema),
   equipment: z.array(InputOptionSchema),
-  equipmentAccess: z.array(InputOptionSchema),
   excludableBlocks: z.array(InputOptionSchema),
   experienceLevels: z.array(InputOptionSchema),
   goals: z.array(InputOptionSchema),
@@ -348,17 +326,17 @@ const TemplateInfoSchema = z.object({
   days_per_week: IntegerRangeSchema,
   session_duration_minutes: IntegerRangeSchema,
   suitable_experience_levels: z.array(ExperienceLevelSchema),
-  canonical_goal_ids: z.array(CanonicalGoalSchema),
+  goal_ids: z.array(UserGoalSchema),
   default_blocks: z.array(BlockRefSchema),
   default_set_types: z.array(SetTypeRefSchema),
-  equipment_access_ids: z.array(EquipmentAccessProfileSchema),
+  required_equipment: z.array(EquipmentItemSchema),
 })
 
 const SessionInputDefaultsSchema = z.object({
   days_per_week: z.number().int(),
   session_duration_minutes: z.number().int(),
   recommended_experience_level: ExperienceLevelSchema,
-  recommended_equipment_access: EquipmentAccessProfileSchema,
+  recommended_equipment: z.array(EquipmentItemSchema),
 })
 
 const WorkoutProgramEntrySchema = z.object({
@@ -367,7 +345,6 @@ const WorkoutProgramEntrySchema = z.object({
   description: z.string(),
   impact_statement: z.string().nullable(),
   goals: z.array(UserGoalSchema),
-  canonical_goals: z.array(CanonicalGoalSchema),
   program_template_id: z.string(),
   template: TemplateInfoSchema,
   session_input_defaults: SessionInputDefaultsSchema,
@@ -388,6 +365,7 @@ const GenerationRequestSchema = z.object({
   session_count: z.number().int().nullable().optional(),
   replace_existing_future_sessions: z.boolean().optional(),
   seed: z.number().int().nullable().optional(),
+  id_only: z.boolean().optional(),
 })
 
 const DemographicsSchema = z.object({
@@ -401,7 +379,6 @@ const DemographicsSchema = z.object({
 const DerivedProfileSchema = z.object({
   age_band: AgeBandSchema.nullable().optional(),
   body_mass_profile: BodyMassProfileSchema.nullable().optional(),
-  canonical_goals: z.array(CanonicalGoalSchema).optional(),
 })
 
 const MovementCompetencyMapSchema = z.object({
@@ -424,9 +401,7 @@ const TrainingBackgroundSchema = z.object({
 })
 
 const GoalsSchema = z.object({
-  primary_goal: UserGoalSchema,
-  secondary_goal: UserGoalSchema.nullable().optional(),
-  goal_priority_weight: z.number().optional(),
+  goals: z.array(UserGoalSchema).min(1),
   target_muscle_groups: z.array(TargetMuscleGroupSchema).optional(),
 })
 
@@ -439,17 +414,20 @@ const InjurySchema = z.object({
 const ConstraintsSchema = z.object({
   available_days_per_week: z.number(),
   session_duration_max_minutes: z.number(),
-  equipment_access: EquipmentAccessProfileSchema,
-  available_equipment: z.array(EquipmentItemSchema).optional(),
+  available_equipment: z.array(EquipmentItemSchema),
   injuries: z.array(InjurySchema).optional(),
 })
 
 const PreferencesSchema = z.object({
   liked_exercises: z.array(z.string()).optional(),
   disliked_exercises: z.array(z.string()).optional(),
+  excluded_exercises: z.array(z.string()).optional(),
   preferred_set_schemes: z.array(SetSchemePreferenceSchema).optional(),
   avoid_movement_patterns: z.array(MovementPatternIdSchema).optional(),
+  required_body_parts: z.array(TargetMuscleGroupSchema).optional(),
+  required_muscles: z.array(z.string()).optional(),
   excluded_blocks: z.array(ExcludableBlockTypeSchema).optional(),
+  include_cross_gender_exercises: z.boolean().optional(),
 })
 
 const ReadinessSchema = z.object({
@@ -532,6 +510,24 @@ const ProgramContextSchema = z.object({
   current_weekly_volume: z.record(z.string(), z.number()).optional(),
 })
 
+const StrengthLevelSchema = z.enum([
+  'very_weak',
+  'weak',
+  'slightly_weak',
+  'average',
+  'slightly_strong',
+  'strong',
+  'very_strong',
+])
+
+const RestReductionSchema = z.union([
+  z.literal(0),
+  z.literal(10),
+  z.literal(25),
+  z.literal(50),
+  z.literal(75),
+])
+
 const CustomerProfileSchema = z.object({
   user_id: z.string(),
   demographics: DemographicsSchema,
@@ -541,6 +537,8 @@ const CustomerProfileSchema = z.object({
   constraints: ConstraintsSchema,
   preferences: PreferencesSchema.optional(),
   readiness: ReadinessSchema.optional(),
+  strength_level: StrengthLevelSchema.nullable().optional(),
+  rest_reduction: RestReductionSchema.nullable().optional(),
 })
 
 export const SessionInputSchema = z.object({
@@ -622,17 +620,27 @@ const UserFeedbackSchema = z.object({
   effort_level: z.number().optional(),
 })
 
-const ExerciseSnapshotSchema = z.object({
+const ExerciseRefSchema = z.object({
+  exercise_id: z.string(),
+})
+
+const ExerciseDefinitionSubstitutionOptionSchema = z.object({
+  exercise_id: z.string(),
+  name: z.string().nullable().optional(),
+  reason: z.string().nullable().optional(),
+})
+
+const ExerciseDefinitionSchema = z.object({
+  exercise_id: z.string(),
   name: z.string(),
   type: z.string(),
   primary_muscle_id: z.string().nullable().optional(),
+  secondary_muscle_ids: z.array(z.string()).optional(),
   equipment_ids: z.array(z.string()).optional(),
   body_part_ids: z.array(z.string()).optional(),
-})
-
-const ExerciseRefSchema = z.object({
-  exercise_id: z.string(),
-  exercise_snapshot: ExerciseSnapshotSchema.nullable().optional(),
+  movement_pattern_ids: z.array(z.string()).optional(),
+  default_coaching_cues: z.array(z.string()).optional(),
+  substitution_options: z.array(ExerciseDefinitionSubstitutionOptionSchema).optional(),
 })
 
 const ExerciseActualsSchema = z.object({
@@ -781,27 +789,26 @@ const WorkoutSessionSchema = z.object({
   updated_at: z.string(),
 })
 
-const WorkoutProgramInstanceSchema = z.object({
+const UserProgramInstanceSchema = z.object({
   id: z.string(),
   catalog_program_id: z.string(),
   program_template_id: z.string(),
   personal_id: z.string(),
-  name: z.string().nullable(),
-  goals: z.array(z.string()),
-  canonical_goals: z.array(z.string()),
-  difficulty_level: z.string().nullable(),
-  days_per_week: z.number().nullable(),
-  duration_weeks: z.number().nullable(),
-  session_duration_minutes: z.number().nullable(),
-  equipment_access_id: z.string().nullable(),
+  name: z.string().nullable().optional(),
+  goals: z.array(UserGoalSchema).optional(),
+  difficulty_level: z.string().nullable().optional(),
+  days_per_week: z.number().nullable().optional(),
+  duration_weeks: z.number().nullable().optional(),
+  session_duration_minutes: z.number().nullable().optional(),
+  available_equipment: z.array(EquipmentItemSchema).optional(),
   status: z.string(),
   is_active: z.boolean(),
-  sessions: z.array(WorkoutSessionSchema),
+  sessions: z.array(WorkoutSessionSchema).optional(),
   created_at: z.string(),
   updated_at: z.string(),
-  started_at: z.string().nullable(),
-  completed_at: z.string().nullable(),
-  expiration_date: z.string().nullable(),
+  started_at: z.string().nullable().optional(),
+  completed_at: z.string().nullable().optional(),
+  expiration_date: z.string().nullable().optional(),
 })
 
 export const WorkoutGenerationResponseSchema = z.object({
@@ -809,18 +816,68 @@ export const WorkoutGenerationResponseSchema = z.object({
   workout_program: z.object({
     mode: z.enum(['existing_reference', 'full']),
     id: z.string(),
-    program_instance: WorkoutProgramInstanceSchema.nullable(),
+    program_instance: UserProgramInstanceSchema.nullable().optional(),
   }),
+  exercises_pool: z.record(z.string(), ExerciseDefinitionSchema),
   workout_sessions: z.array(WorkoutSessionSchema),
   generation_scope: z.string(),
-  generation_metadata: z.object({
-    engine_version: z.string(),
-    input_contract_version: z.string(),
-    generated_at: z.string(),
-    notes: z.string().nullable(),
-  }),
+  generation_metadata: z
+    .object({
+      engine_version: z.string().optional(),
+      input_contract_version: z.string().optional(),
+      generated_at: z.string().optional(),
+    })
+    .optional(),
   requestId: z.string(),
 })
 export type WorkoutGenerationResponse = z.infer<
   typeof WorkoutGenerationResponseSchema
 >
+
+export const ExerciseCatalogEntrySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.string(),
+  gender: z.string(),
+  body_part_ids: z.array(z.string()),
+  equipment_ids: z.array(z.string()),
+  primary_muscle_id: z.string().nullable(),
+  secondary_muscle_ids: z.array(z.string()),
+  movement_pattern_ids: z.array(z.string()),
+  condition_restriction_ids: z.array(InjuryConditionSchema),
+  condition_indication_ids: z.array(z.string()),
+  lateralization_ids: z.array(z.string()),
+  stability_demand_id: z.string().nullable(),
+  coordination_complexity_id: z.string().nullable(),
+  impact_level_id: z.string().nullable(),
+  rom_id: z.string().nullable(),
+  spinal_load_id: z.string().nullable(),
+  grip_ids: z.array(z.string()),
+  variation_level_id: z.string(),
+  exercise_priority_score: z.number().nullable(),
+  progression_track_score: z.number().nullable(),
+  fatigue_cost_score: z.number().nullable(),
+  technical_difficulty_score: z.number().nullable(),
+  repeat_cooldown_sessions: z.number(),
+  target_repeat_freq_14d: z.number(),
+  weekly_volume_tolerance: z.string().nullable(),
+  novelty_weight: z.number().nullable(),
+  setup_time_score: z.number().nullable(),
+  substitution_ids: z.array(z.string()),
+  disabled: z.boolean().nullable().optional(),
+})
+export type ExerciseCatalogEntryDTO = z.infer<typeof ExerciseCatalogEntrySchema>
+
+export const ExercisesListResponseSchema = z.object({
+  engineVersion: z.string(),
+  exercises: z.array(ExerciseCatalogEntrySchema),
+  requestId: z.string(),
+})
+export type ExercisesListResponse = z.infer<typeof ExercisesListResponseSchema>
+
+export const ExerciseResponseSchema = z.object({
+  engineVersion: z.string(),
+  exercise: ExerciseCatalogEntrySchema,
+  requestId: z.string(),
+})
+export type ExerciseResponse = z.infer<typeof ExerciseResponseSchema>

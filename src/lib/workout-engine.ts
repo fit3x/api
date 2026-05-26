@@ -1,15 +1,15 @@
 import {
   DATA,
+  EXERCISE_BY_ID,
   VERSION,
   generateWorkout,
   getBiologicalSexOptions,
   getBlockTypeOptions,
   getBodyPartOptions,
-  getCanonicalGoalOptions,
   getConditionOptions,
-  getEquipmentAccessOptions,
   getEquipmentOptions,
   getExcludableBlockOptions,
+  getExercises,
   getExperienceLevelOptions,
   getGoalOptions,
   getInjuryOptions,
@@ -18,6 +18,7 @@ import {
   getSetTypeOptions,
   getWorkoutPrograms,
   loadLocale,
+  type ExerciseCatalogEntry,
   type LocaleBundle,
   type SessionInput,
   type SupportedLocale,
@@ -30,10 +31,8 @@ export const getOptionsBundle = (locale: SupportedLocale) => ({
   biologicalSexes: getBiologicalSexOptions(locale),
   blockTypes: getBlockTypeOptions(locale),
   bodyParts: getBodyPartOptions(locale),
-  canonicalGoals: getCanonicalGoalOptions(locale),
   conditions: getConditionOptions(locale),
   equipment: getEquipmentOptions(locale),
-  equipmentAccess: getEquipmentAccessOptions(locale),
   excludableBlocks: getExcludableBlockOptions(locale),
   experienceLevels: getExperienceLevelOptions(locale),
   goals: getGoalOptions(locale),
@@ -44,6 +43,13 @@ export const getOptionsBundle = (locale: SupportedLocale) => ({
 })
 
 export const getProgramsCatalog = () => getWorkoutPrograms({ data: DATA })
+
+export const getAllExercises = (): readonly ExerciseCatalogEntry[] =>
+  getExercises()
+
+export const getExerciseById = (
+  id: string,
+): ExerciseCatalogEntry | undefined => EXERCISE_BY_ID.get(id)
 
 const localeCache = new Map<SupportedLocale, LocaleBundle>()
 const getLocaleBundle = (locale: SupportedLocale): LocaleBundle => {

@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@fit3x/workout-engine':
-        specifier: ^1.2.0
-        version: 1.2.0
+        specifier: ^1.2.3
+        version: 1.2.3
       '@hono/zod-openapi':
         specifier: ^1.4.0
         version: 1.4.0(hono@4.12.18)(zod@4.4.3)
@@ -266,8 +266,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fit3x/workout-engine@1.2.0':
-    resolution: {integrity: sha512-FJ5a4mB1IJXZK+N5vaalw6CDHPVVtaFRoeDEyChVg9gCYnOQpSBQGjVUP2nHIFH8GXamzlS0aVDjhBA3jztDpg==, tarball: https://npm.pkg.github.com/download/@fit3x/workout-engine/1.2.0/71d647ac2bab1d338400a1061b8b261ba9254ebc}
+  '@fit3x/workout-engine@1.2.3':
+    resolution: {integrity: sha512-96VkXKMcRBJtuIWc7xOOrpYTaMMrktgybEppuNxjvOc0aZ7UNyKPf9PMrPMbeDQYnlB3ICrVXb4TFkGgYf/bLg==, tarball: https://npm.pkg.github.com/download/@fit3x/workout-engine/1.2.3/6d5d0cbd00f72bea50f332822ebe5dac56642cd3}
     engines: {node: '>=18'}
 
   '@hono/zod-openapi@1.4.0':
@@ -1118,7 +1118,7 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@fit3x/workout-engine@1.2.0':
+  '@fit3x/workout-engine@1.2.3':
     dependencies:
       ajv: 8.20.0
 
