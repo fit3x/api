@@ -1,69 +1,11 @@
 import { Hono } from 'hono'
-import { exportJWK, generateKeyPair, type JWK, SignJWT } from 'jose'
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 
 import { applyCoreMiddleware } from '../../middleware'
 import type { AppEnv, Bindings } from '../../types/app'
 import { optionsRoutes } from './options'
 
 const PROJECT_URL = 'https://test.supabase.co'
-const JWKS_URL = `${PROJECT_URL}/auth/v1/.well-known/jwks.json`
-const ISSUER = `${PROJECT_URL}/auth/v1`
-const AUDIENCE = 'authenticated'
-const KID = 'test-key'
-
-type FixtureKey = {
-  privateKey: CryptoKey
-  publicJwk: JWK
-}
-
-let primaryKey: FixtureKey
-
-const resolveUrl = (input: RequestInfo | URL): string => {
-  if (typeof input === 'string') return input
-  if (input instanceof URL) return input.toString()
-  return input.url
-}
-
-beforeAll(async () => {
-  const { privateKey, publicKey } = await generateKeyPair('RS256', {
-    extractable: true,
-  })
-  const publicJwk = await exportJWK(publicKey)
-  publicJwk.alg = 'RS256'
-  publicJwk.use = 'sig'
-  publicJwk.kid = KID
-  primaryKey = { privateKey, publicJwk }
-
-  vi.stubGlobal(
-    'fetch',
-    async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-      const url = resolveUrl(input)
-      if (url === JWKS_URL) {
-        return new Response(JSON.stringify({ keys: [primaryKey.publicJwk] }), {
-          headers: { 'content-type': 'application/json' },
-          status: 200,
-        })
-      }
-      throw new Error(`Unmocked fetch in test: ${init?.method ?? 'GET'} ${url}`)
-    },
-  )
-})
-
-afterAll(() => {
-  vi.unstubAllGlobals()
-})
-
-const mintToken = async (subject = 'user-123'): Promise<string> => {
-  return new SignJWT({ role: 'authenticated' })
-    .setProtectedHeader({ alg: 'RS256', kid: KID })
-    .setSubject(subject)
-    .setIssuer(ISSUER)
-    .setAudience(AUDIENCE)
-    .setIssuedAt()
-    .setExpirationTime('1h')
-    .sign(primaryKey.privateKey)
-}
 
 const buildApp = () => {
   const app = new Hono<AppEnv>()
@@ -82,28 +24,22 @@ const callOptions = (
 }
 
 describe('GET /v1/options', () => {
-  it('returns 401 without an Authorization header', async () => {
+  it('returns 200 without an Authorization header (public route)', async () => {
     const res = await callOptions()
-    expect(res.status).toBe(401)
-    const body = (await res.json()) as { error?: { code?: string } }
-    expect(body.error?.code).toBe('unauthorized')
+    expect(res.status).toBe(200)
+    const body = (await res.json()) as Record<string, unknown>
+    expect(Array.isArray(body.goals)).toBe(true)
   })
 
   it('returns 400 when locale is unsupported', async () => {
-    const token = await mintToken()
-    const res = await callOptions('/v1/options?locale=zz', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    const res = await callOptions('/v1/options?locale=zz')
     expect(res.status).toBe(400)
     const body = (await res.json()) as { error?: { code?: string } }
     expect(body.error?.code).toBe('bad_request')
   })
 
   it('returns 200 with all 12 option lists when no locale is given (default en)', async () => {
-    const token = await mintToken()
-    const res = await callOptions('/v1/options', {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    const res = await callOptions('/v1/options')
     expect(res.status).toBe(200)
     const body = (await res.json()) as Record<string, unknown>
     expect(Array.isArray(body.goals)).toBe(true)
@@ -139,10 +75,7 @@ describe('GET /v1/options', () => {
   it.each(['en', 'es', 'pt-BR', 'fr'])(
     'returns 200 with a stable value-ordered list for locale=%s',
     async (locale) => {
-      const token = await mintToken()
-      const res = await callOptions(`/v1/options?locale=${locale}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      const res = await callOptions(`/v1/options?locale=${locale}`)
       expect(res.status).toBe(200)
       const body = (await res.json()) as {
         goals: Array<{ value: string; label: string }>

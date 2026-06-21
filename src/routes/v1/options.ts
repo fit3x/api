@@ -1,7 +1,6 @@
 import { Hono } from 'hono'
 
 import { getEngineVersion, getOptionsBundle } from '../../lib/workout-engine'
-import { requireSupabaseAuth } from '../../middleware/auth'
 import type { AppEnv } from '../../types/app'
 import {
   LocaleQuerySchema,
@@ -9,8 +8,6 @@ import {
 } from '../../types/workout-engine'
 
 export const optionsRoutes = new Hono<AppEnv>()
-
-optionsRoutes.use('/options', requireSupabaseAuth())
 
 optionsRoutes.get('/options', (c) => {
   const requestId = c.get('requestId')
@@ -31,7 +28,7 @@ optionsRoutes.get('/options', (c) => {
   }
 
   const etag = `"options-${getEngineVersion()}-${parsed.data.locale}"`
-  c.header('Cache-Control', 'private, max-age=3600')
+  c.header('Cache-Control', 'public, max-age=3600')
   c.header('ETag', etag)
 
   if (c.req.header('If-None-Match') === etag) {
