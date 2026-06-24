@@ -10,17 +10,17 @@
     "test": "node scripts/run-vitest.mjs"
   },
   "dependencies": {
-    "@fit3x/workout-engine": "^1.2.4",
+    "@fit3x/workout-engine": "^1.2.5",
     "@hono/zod-openapi": "^1.4.0",
     "@hono/zod-validator": "^0.8.0",
-    "hono": "^4.12.26",
+    "hono": "^4.12.27",
     "jose": "^6.2.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@cloudflare/vitest-pool-workers": "^0.16.18",
+    "@cloudflare/vitest-pool-workers": "^0.16.19",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9",
-    "wrangler": "^4.103.0"
+    "wrangler": "^4.104.0"
   }
 }

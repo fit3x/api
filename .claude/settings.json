@@ -13,7 +13,9 @@
       "Read(//Users/robsonjardim/Documents/dev/git-projects/Fit3xGen/**)",
       "Bash(find /Users/robsonjardim/Documents/dev/git-projects/Fit3x/docs -type f 2>/dev/null | head -20)",
       "Read(//Users/robsonjardim/Documents/dev/git-projects/Fit3x/**)",
-      "Bash(pnpm remove *)"
+      "Bash(pnpm remove *)",
+      "Bash(echo \"=== exit: $? ===\")",
+      "Bash(echo \"tsc-exit=$?\")"
     ],
     "additionalDirectories": [
       "/tmp"

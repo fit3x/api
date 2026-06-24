@@ -669,28 +669,35 @@ const ExerciseTrackingSchema = z.object({
   notes: z.string().nullable().optional(),
 })
 
+const RepsRangeSchema = z.object({
+  min: z.number(),
+  max: z.number(),
+})
+
+// v3: the work prescription lives on each exercise (was on the set before).
 const PrescribedExerciseSchema = z.object({
   id: z.string(),
   role: ExerciseRoleSchema.nullable().optional(),
   order_index: z.number().nullable().optional(),
   reps: z.number().nullable().optional(),
+  reps_range: RepsRangeSchema.nullable().optional(),
   duration_seconds: z.number().nullable().optional(),
   distance: z.number().nullable().optional(),
+  distance_unit: z.string().nullable().optional(),
   rest_seconds: z.number().nullable().optional(),
+  tempo: z.string().nullable().optional(),
   tempo_eccentric_seconds: z.number().nullable().optional(),
   tempo_concentric_seconds: z.number().nullable().optional(),
   rest_pause_seconds: z.number().nullable().optional(),
   weight: z.number().nullable().optional(),
+  load_percentage_1rm: z.number().nullable().optional(),
+  rpe_target: z.number().nullable().optional(),
+  rir_target: z.number().nullable().optional(),
   coaching_cues: z.array(z.string()).optional(),
   substitution_options: z.array(SubstitutionOptionSchema).optional(),
   exercise_ref: ExerciseRefSchema,
   exercise_actuals: ExerciseActualsSchema.optional(),
   exercise_tracking: ExerciseTrackingSchema.optional(),
-})
-
-const RepsRangeSchema = z.object({
-  min: z.number(),
-  max: z.number(),
 })
 
 const SetTrackingSchema = z.object({
@@ -708,43 +715,20 @@ const SetTrackingSchema = z.object({
   notes: z.string().nullable().optional(),
 })
 
+// v3: sets are flat on the session (no SessionBlock wrapper). Each set is a
+// round-group carrying its phase tag (block_type) and round count (rounds);
+// group consecutive sets by block_type to rebuild phase headers.
 const PrescribedSetSchema = z.object({
   id: z.string(),
   set_number: z.number(),
   set_type: SetTypeSchema,
+  block_type: BlockTypeSchema,
+  rounds: z.number(),
   set_role: SetRoleSchema.nullable().optional(),
-  reps: z.number().nullable().optional(),
-  reps_range: RepsRangeSchema.nullable().optional(),
-  duration_seconds: z.number().nullable().optional(),
-  distance: z.number().nullable().optional(),
-  distance_unit: z.string().nullable().optional(),
   rest_seconds: z.number().nullable().optional(),
-  load_kg: z.number().nullable().optional(),
-  load_percentage_1rm: z.number().nullable().optional(),
-  rpe_target: z.number().nullable().optional(),
-  rir_target: z.number().nullable().optional(),
-  tempo: z.string().nullable().optional(),
   exercises: z.array(PrescribedExerciseSchema),
   is_completed: z.boolean(),
   tracking: SetTrackingSchema.optional(),
-  created_at: z.string(),
-  updated_at: z.string(),
-})
-
-const BlockTrackingSchema = z.object({
-  actual_duration_minutes: z.number().nullable().optional(),
-  notes: z.string().nullable().optional(),
-})
-
-const SessionBlockSchema = z.object({
-  id: z.string(),
-  block_type: BlockTypeSchema,
-  block_label: z.string().nullable().optional(),
-  order_index: z.number(),
-  estimated_duration_minutes: z.number().nullable().optional(),
-  rest_seconds: z.number().nullable().optional(),
-  sets: z.array(PrescribedSetSchema),
-  block_tracking: BlockTrackingSchema.optional(),
   created_at: z.string(),
   updated_at: z.string(),
 })
@@ -773,6 +757,9 @@ const WorkoutSessionSchema = z.object({
   week_number: z.number(),
   order_index: z.number(),
   duration_minutes: z.number(),
+  level: ExperienceLevelSchema,
+  total_sets: z.number(),
+  total_unique_exercises: z.number(),
   status: SessionStatusSchema,
   training_day_type: TrainingDayTypeSchema.nullable().optional(),
   focus_muscles: z.array(z.string()).optional(),
@@ -780,7 +767,7 @@ const WorkoutSessionSchema = z.object({
   target_intensity: TargetIntensitySchema.nullable().optional(),
   session_rpe_target: z.number().nullable().optional(),
   coach_notes: z.string().nullable().optional(),
-  blocks: z.array(SessionBlockSchema),
+  sets: z.array(PrescribedSetSchema),
   started_at: z.string().nullable().optional(),
   completed_at: z.string().nullable().optional(),
   session_tracking: SessionTrackingSchema.optional(),
@@ -826,6 +813,7 @@ export const WorkoutGenerationResponseSchema = z.object({
       engine_version: z.string().optional(),
       input_contract_version: z.string().optional(),
       generated_at: z.string().optional(),
+      notes: z.string().nullable().optional(),
     })
     .optional(),
   requestId: z.string(),

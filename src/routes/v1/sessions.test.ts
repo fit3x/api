@@ -178,10 +178,10 @@ describe('POST /v1/sessions/generate', () => {
       exercises_pool: Record<string, { exercise_id: string; name: string }>
       workout_sessions: Array<{
         id: string
-        blocks: Array<{
-          sets: Array<{
-            exercises: Array<{ exercise_ref: Record<string, unknown> }>
-          }>
+        sets: Array<{
+          block_type: string
+          rounds: number
+          exercises: Array<{ exercise_ref: Record<string, unknown> }>
         }>
       }>
       generation_scope: string
@@ -192,14 +192,15 @@ describe('POST /v1/sessions/generate', () => {
     expect(['existing_reference', 'full']).toContain(body.workout_program.mode)
     expect(Array.isArray(body.workout_sessions)).toBe(true)
     expect(body.workout_sessions.length).toBeGreaterThan(0)
-    expect(Array.isArray(body.workout_sessions[0].blocks)).toBe(true)
+    expect(Array.isArray(body.workout_sessions[0].sets)).toBe(true)
+    expect(body.workout_sessions[0].sets.length).toBeGreaterThan(0)
     expect(body.generation_scope).toBe('single_session')
     expect(typeof body.requestId).toBe('string')
 
     expect(typeof body.exercises_pool).toBe('object')
     expect(Object.keys(body.exercises_pool).length).toBeGreaterThan(0)
 
-    const firstSet = body.workout_sessions[0].blocks[0].sets[0]
+    const firstSet = body.workout_sessions[0].sets[0]
     const ref = firstSet.exercises[0].exercise_ref
     expect(Object.keys(ref)).toEqual(['exercise_id'])
     expect(body.exercises_pool[ref.exercise_id as string]).toBeDefined()
