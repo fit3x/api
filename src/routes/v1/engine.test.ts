@@ -72,7 +72,7 @@ const buildApp = () => {
   return app
 }
 
-const callEngineVersion = (init: RequestInit = {}): Promise<Response> => {
+const callEngineVersion = async (init: RequestInit = {}): Promise<Response> => {
   const app = buildApp()
   const env: Bindings = { SUPABASE_PROJECT_URL: PROJECT_URL }
   return app.request('/v1/engine/version', init, env)

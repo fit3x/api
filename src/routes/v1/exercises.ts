@@ -22,7 +22,7 @@ exercisesRoutes.get('/exercises', (c) => {
   const engineVersion = getEngineVersion()
   const etag = `"exercises-${engineVersion}"`
 
-  c.header('Cache-Control', 'public, max-age=3600')
+  c.header('Cache-Control', 'private, max-age=3600')
   c.header('ETag', etag)
   if (c.req.header('If-None-Match') === etag) {
     return c.body(null, 304)
@@ -42,7 +42,7 @@ exercisesRoutes.get('/exercises/:id', (c) => {
 
   const engineVersion = getEngineVersion()
   const etag = `"exercise-${id}-${engineVersion}"`
-  c.header('Cache-Control', 'public, max-age=3600')
+  c.header('Cache-Control', 'private, max-age=3600')
   c.header('ETag', etag)
 
   const entry = getExerciseById(id)

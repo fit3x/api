@@ -1,5 +1,7 @@
 {
   "permissions": {
+    "sandbox": { "enabled": true },
+    "defaultMode": "auto",
     "allow": [
       "Bash(pnpm exec *)",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('exports',{}\\), indent=2\\)\\)\")",
@@ -17,8 +19,6 @@
       "Bash(echo \"=== exit: $? ===\")",
       "Bash(echo \"tsc-exit=$?\")"
     ],
-    "additionalDirectories": [
-      "/tmp"
-    ]
+    "additionalDirectories": ["/tmp"]
   }
 }

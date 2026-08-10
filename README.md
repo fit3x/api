@@ -64,6 +64,71 @@ or use `wrangler rollback --env production`.
 > new version path (`/v2/...`) alongside the old one — it is not a Worker
 > redeploy of `/v1`. See `CLAUDE.md`.
 
+## Workout engine
+
+The API wraps `@fit3x/workout-engine` (published from the `Fit3xGen` repo's
+`ts-package/`). `/v1` currently speaks **engine 1.3.0 / contract v3.0.0**.
+
+| Route                      | Engine call            |
+|----------------------------|------------------------|
+| `POST /v1/sessions/generate` | `generateWorkout`    |
+| `GET /v1/programs`         | `getPrograms`          |
+| `GET /v1/sessions/catalog` | `getSessions`          |
+| `GET /v1/sessions/coverage`| `getSessionCoverage`   |
+| `GET /v1/options`          | `get*Options`          |
+| `GET /v1/exercises`        | `getExercises`         |
+
+> **Blocked: engine 1.3.0 cannot generate on Workers as published.**
+> `generateWorkout` → `validateInput` calls `ajv.compile()`, which builds a
+> validator with `new Function`. Cloudflare Workers forbid runtime code
+> generation, so the first generate call fails with
+> `EvalError: Code generation from strings disallowed for this context`.
+> Catalog routes (`/v1/programs`, `/v1/sessions/catalog`,
+> `/v1/sessions/coverage`, `/v1/options`, `/v1/exercises`) are unaffected.
+> Fix belongs in Fit3xGen — precompile the schema with ajv's standalone mode
+> so no validator is built at runtime. See "Verifying an engine upgrade".
+
+### Upgrading the engine
+
+The contract is asserted at both boundaries, so an engine bump is a code
+change, not a version bump alone:
+
+1. Bump the dependency and reinstall.
+2. Diff `Fit3xGen/json_contracts/json-input-output/{input,output}_contract.json`
+   and `ts-package/src/types/{input,output,session}.ts` against
+   `src/types/workout-engine.ts`.
+3. Diff `ts-package/src/index.ts` against the imports in
+   `src/lib/workout-engine.ts` — the export surface moves between versions
+   (1.3.0 replaced `getWorkoutPrograms` with `getPrograms`, dropped
+   `getBlockTypeOptions` / `getExcludableBlockOptions`, and changed
+   `generateWorkout` to `generateWorkout(input, options?)` with the locale
+   read from `generation_request.locale`).
+4. `pnpm test && pnpm exec tsc --noEmit`.
+5. Smoke-test generation under `wrangler dev` — see below. **Do not treat a
+   green Vitest run as proof the engine works in production.**
+
+The generation route asserts the engine's response with Zod before returning
+it, so a contract drift surfaces as a logged
+`sessions.generate.engine_contract_violation` and a 500 rather than a
+malformed payload reaching a client.
+
+### Verifying an engine upgrade
+
+`@cloudflare/vitest-pool-workers` runs workerd with an `unsafeEval` binding
+that production does **not** have. Anything the engine does with `eval` or
+`new Function` therefore passes in Vitest and fails once deployed — which is
+exactly how the ajv issue above hides.
+
+So after any engine bump, exercise generation through a real isolate:
+
+```bash
+pnpm dev                      # wrangler dev, no unsafeEval
+# then drive POST /v1/sessions/generate with a real JWT — see bruno/
+```
+
+A `Code generation from strings disallowed` error there means the engine
+compiles something at runtime and needs a build-time precompile instead.
+
 ## Stack
 
 Hono · Cloudflare Workers · TypeScript · Zod · Supabase · Unkey

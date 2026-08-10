@@ -1,0 +1,32 @@
+meta {
+  name: Sessions Coverage
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{baseUrl}}/v1/sessions/coverage
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+docs {
+  Body-part coverage of the standalone session catalog (new in engine 1.3.0).
+
+  by_gender[sex][bodyPartCombination] -> { eligible, full }
+
+  Combination keys are "+"-joined sorted body-part ids, up to
+  max_combination_size parts.
+
+    eligible == 0  a single_session request for that combination FAILS —
+                   disable the selection in the UI.
+    full == 0      it generates, but the session covers only part of the
+                   selection (partial_body_part_coverage warning).
+
+  Call this before offering body-part pickers so users cannot select an
+  impossible combination.
+}

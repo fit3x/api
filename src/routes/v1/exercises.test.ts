@@ -72,7 +72,7 @@ const buildApp = () => {
   return app
 }
 
-const callExercises = (
+const callExercises = async (
   path = '/v1/exercises',
   init: RequestInit = {},
 ): Promise<Response> => {

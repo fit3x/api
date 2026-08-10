@@ -5,11 +5,39 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/v1/programs
+  url: {{baseUrl}}/v1/programs?locale=en
   body: none
   auth: bearer
 }
 
+query {
+  locale: en
+  ~gender: male
+  ~goals: build_muscle
+  ~days_per_week: 3
+  ~session_duration_minutes: 45
+  ~difficulty_level: intermediate
+  ~focus_body_parts: chest,triceps
+  ~available_equipment: body_weight,dumbbell,bench
+}
+
 auth:bearer {
   token: {{jwt}}
+}
+
+docs {
+  Template-program catalog (engine 1.3.0 getPrograms).
+
+  Response is { version, count, programs[], requestId }. The v1.2.x
+  `generated_at`, `lookups`, `programs[].template` and
+  `programs[].session_input_defaults` are gone; each entry is now flat:
+
+    id, program_template_id, gender, name, description, goals,
+    difficulty_level, min/max_days_per_week,
+    min/max_session_duration_minutes, required_equipment, focus_body_parts,
+    duration_weeks, days_per_week
+
+  `id` is what you send as generation_request.program_id to pin a program.
+  Optional filters are disabled by default (~ prefix); list filters are
+  comma-separated.
 }

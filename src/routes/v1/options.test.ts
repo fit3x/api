@@ -14,7 +14,7 @@ const buildApp = () => {
   return app
 }
 
-const callOptions = (
+const callOptions = async (
   path = '/v1/options',
   init: RequestInit = {},
 ): Promise<Response> => {
@@ -38,7 +38,7 @@ describe('GET /v1/options', () => {
     expect(body.error?.code).toBe('bad_request')
   })
 
-  it('returns 200 with all 12 option lists when no locale is given (default en)', async () => {
+  it('returns 200 with all 11 option lists when no locale is given (default en)', async () => {
     const res = await callOptions('/v1/options')
     expect(res.status).toBe(200)
     const body = (await res.json()) as Record<string, unknown>
@@ -53,16 +53,17 @@ describe('GET /v1/options', () => {
       body.muscles as Array<{ value: string; label: string; simple_label: string }>
     )[0]
     expect(typeof muscle0.simple_label).toBe('string')
+    // v1.3.0 dropped blockTypes/excludableBlocks (v3 has no session blocks)
+    // and added intensities.
     const expectedKeys = [
       'biologicalSexes',
-      'blockTypes',
       'bodyParts',
       'conditions',
       'equipment',
-      'excludableBlocks',
       'experienceLevels',
       'goals',
       'injuries',
+      'intensities',
       'movementPatterns',
       'muscles',
       'setTypes',
@@ -70,6 +71,18 @@ describe('GET /v1/options', () => {
     for (const k of expectedKeys) {
       expect(Array.isArray(body[k])).toBe(true)
     }
+    expect(body).not.toHaveProperty('blockTypes')
+    expect(body).not.toHaveProperty('excludableBlocks')
+
+    // The v3 goal vocabulary is exactly four.
+    expect((body.goals as Array<{ value: string }>).map((g) => g.value)).toEqual([
+      'get_stronger',
+      'build_muscle',
+      'lose_fat',
+      'improve_general_fitness',
+    ])
+    // constraints.body_parts is the 10-value body-part vocabulary.
+    expect((body.bodyParts as unknown[]).length).toBe(10)
   })
 
   it.each(['en', 'es', 'pt-BR', 'fr'])(

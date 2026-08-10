@@ -16,7 +16,7 @@ auth:bearer {
 
 body:json {
   {
-    "version": "2.0.0",
+    "version": "3.0.0",
     "generation_request": {
       "scope": "single_session",
       "locale": "en"
@@ -35,9 +35,28 @@ body:json {
       },
       "constraints": {
         "available_days_per_week": 4,
-        "session_duration_max_minutes": 60,
-        "available_equipment": ["barbell", "dumbbell", "cable", "body_weight"]
-      }
+        "session_duration_minutes": 60,
+        "available_equipment": ["barbell", "dumbbell", "cable", "body_weight", "bench"],
+        "body_parts": ["chest", "triceps"]
+      },
+      "desired_intensity": "moderate"
     }
   }
+}
+
+docs {
+  Input contract v3.0.0 (engine >= 1.3.0).
+
+  Changed from v2:
+    - constraints.session_duration_max_minutes -> constraints.session_duration_minutes
+    - constraints.body_parts added; REQUIRED when scope is "single_session"
+      (10-value vocabulary: abs, back, biceps, cardio, chest, forearms, legs,
+      plyometrics, shoulders, triceps)
+    - goals narrowed to 4 values: get_stronger, build_muscle, lose_fat,
+      improve_general_fitness
+    - "bench" added to available_equipment
+    - customer_profile.desired_intensity replaces customer_profile.readiness
+    - previous_sessions and program_context were removed entirely
+
+  See "Sessions Generate Pinned Program" for generation_request.program_id.
 }

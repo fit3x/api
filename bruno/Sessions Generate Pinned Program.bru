@@ -1,0 +1,66 @@
+meta {
+  name: Sessions Generate Pinned Program
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/v1/sessions/generate
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt}}
+}
+
+body:json {
+  {
+    "version": "3.0.0",
+    "generation_request": {
+      "scope": "week_sessions",
+      "locale": "en",
+      "program_id": "{{programId}}"
+    },
+    "customer_profile": {
+      "user_id": "user-123",
+      "demographics": {
+        "age": 30,
+        "biological_sex": "male"
+      },
+      "training_background": {
+        "experience_level": "intermediate"
+      },
+      "goals": {
+        "goals": ["build_muscle"]
+      },
+      "constraints": {
+        "available_days_per_week": 3,
+        "session_duration_minutes": 45,
+        "available_equipment": ["body_weight", "dumbbell", "bench"]
+      }
+    }
+  }
+}
+
+docs {
+  Caller-selected program (new in engine 1.3.0).
+
+  program_id is a `programs[].id` from GET /v1/programs — NOT a
+  program_template_id. Set the `programId` environment variable from that
+  response before running this request.
+
+  When pinned, the engine skips program selection entirely:
+    - generation_metadata.selected_program.selected == "pinned"
+    - score and rank are null, selection_fallbacks is empty
+    - duration fitting is DISABLED, so sessions ship at their authored length;
+      an overrun is disclosed as a duration_out_of_band warning
+    - a program-level fit miss is disclosed as pinned_program_mismatch
+
+  Everything else still adapts to the profile (equipment, contraindications,
+  loads, reps, experience caps, warm-ups).
+
+  Valid only for week_sessions / month_sessions / program_sessions.
+  Sending it with single_session returns 400.
+  An id that does not resolve returns 404 program_not_found.
+}
