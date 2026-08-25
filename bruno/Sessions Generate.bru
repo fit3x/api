@@ -25,7 +25,9 @@ body:json {
       "user_id": "user-123",
       "demographics": {
         "age": 30,
-        "biological_sex": "male"
+        "biological_sex": "male",
+        "height_cm": 180,
+        "weight_kg": 80
       },
       "training_background": {
         "experience_level": "intermediate"
@@ -44,12 +46,38 @@ body:json {
   }
 }
 
+assert {
+  res.status: eq 200
+  res.body.version: eq 3.0.0
+  res.body.generation_scope: eq single_session
+  res.body.workout_program.mode: eq full
+  res.body.workout_sessions.length: gte 1
+  res.body.generation_metadata.selected_program.source: eq session_catalog
+}
+
+vars:post-response {
+  sessionRef: res.body.workout_sessions[0].generation_metadata.template_session_ref
+}
+
 docs {
-  Input contract v3.0.0 (engine >= 1.3.0).
+  Input contract v3.0.0 (engine >= 1.3.3).
+
+  chest+triceps has 66 eligible sessions (32 covering both) for male, so this
+  body generates cleanly with NO warnings. height_cm/weight_kg are included on
+  purpose: without them the engine cannot derive bodyweight-relative loads and
+  every run carries a `missing_weight` warning.
+
+  On success `sessionRef` is captured from the response. Add it to
+  generation_request.previous_session_refs to rotate the next single_session
+  away from this one:
+
+    "previous_session_refs": ["{{sessionRef}}"]
 
   Changed from v2:
     - constraints.session_duration_max_minutes -> constraints.session_duration_minutes
-    - constraints.body_parts added; REQUIRED when scope is "single_session"
+    - constraints.body_parts added; REQUIRED when scope is "single_session",
+      and EXCLUSIVE — the session never trains a body part you did not list,
+      though it may train fewer. Check GET /v1/sessions/coverage first.
       (10-value vocabulary: abs, back, biceps, cardio, chest, forearms, legs,
       plyometrics, shoulders, triceps)
     - goals narrowed to 4 values: get_stronger, build_muscle, lose_fat,
@@ -59,4 +87,11 @@ docs {
     - previous_sessions and program_context were removed entirely
 
   See "Sessions Generate Pinned Program" for generation_request.program_id.
+
+  Requires engine >= 1.3.3. On 1.3.0 this returned 422 unprocessable_entity
+  against `pnpm dev` — not a problem with the request: 1.3.0 compiled its
+  input validator with ajv at runtime, which Cloudflare Workers forbid, so
+  generation died inside the Worker with "EvalError: Code generation from
+  strings disallowed for this context". 1.3.3 precompiles the validator at
+  build time.
 }

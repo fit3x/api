@@ -19,8 +19,9 @@ docs {
 
   by_gender[sex][bodyPartCombination] -> { eligible, full }
 
-  Combination keys are "+"-joined sorted body-part ids, up to
-  max_combination_size parts.
+  Combination keys are PIPE-joined, alphabetically sorted body-part ids, up to
+  max_combination_size (4) parts — e.g. "chest", "chest|triceps",
+  "abs|back|biceps|legs". 385 keys per gender.
 
     eligible == 0  a single_session request for that combination FAILS —
                    disable the selection in the UI.

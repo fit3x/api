@@ -32,21 +32,21 @@ Save (Cmd+S) — these values stick in your local copy of the env files.
 
 ## Requests
 
-| Order | Name              | Endpoint                                                                | Auth |
-|-------|-------------------|-------------------------------------------------------------------------|------|
-| 0     | Sign In           | `POST {{supabaseUrl}}/auth/v1/token?grant_type=password` (auto-captures JWT) | none |
-| 1     | Health            | `GET /v1/health`                                                        | none |
-| 2     | Me                | `GET /v1/me`                                                            | JWT  |
-| 3     | Engine Version    | `GET /v1/engine/version`                                                | JWT  |
-| 4     | Options           | `GET /v1/options?locale=en`                                             | JWT  |
-| 5     | Programs          | `GET /v1/programs`                                                      | JWT  |
-| 6     | Sessions Generate | `POST /v1/sessions/generate`                                            | JWT  |
-| 7     | Sessions Generate Pinned Program | `POST /v1/sessions/generate` with `program_id`            | JWT  |
-| 8     | Sessions Catalog  | `GET /v1/sessions/catalog`                                              | JWT  |
-| 9     | Sessions Coverage | `GET /v1/sessions/coverage`                                             | JWT  |
+| Seq | Name              | Endpoint                                                                | Auth |
+|-----|-------------------|-------------------------------------------------------------------------|------|
+| 1   | Sign In           | `POST {{supabaseUrl}}/auth/v1/token?grant_type=password` (auto-captures JWT) | none |
+| 2   | Health            | `GET /v1/health`                                                        | none |
+| 3   | Me                | `GET /v1/me`                                                            | JWT  |
+| 4   | Engine Version    | `GET /v1/engine/version`                                                | JWT  |
+| 5   | Options           | `GET /v1/options?locale=en`                                             | none |
+| 6   | Programs          | `GET /v1/programs`                                                      | JWT  |
+| 7   | Sessions Generate | `POST /v1/sessions/generate`                                            | JWT  |
+| 8   | Sessions Generate Pinned Program | `POST /v1/sessions/generate` with `program_id`            | JWT  |
+| 9   | Sessions Catalog  | `GET /v1/sessions/catalog`                                              | JWT  |
+| 10  | Sessions Coverage | `GET /v1/sessions/coverage`                                             | JWT  |
 
 The Sessions Generate body is a minimal valid `SessionInput` for **input
-contract v3.0.0** (engine >= 1.3.0). Edit it to exercise other scopes
+contract v3.0.0** (engine >= 1.3.3). Edit it to exercise other scopes
 (`week_sessions`, `month_sessions`, `program_sessions`) or richer customer
 profiles.
 

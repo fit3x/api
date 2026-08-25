@@ -67,7 +67,7 @@ or use `wrangler rollback --env production`.
 ## Workout engine
 
 The API wraps `@fit3x/workout-engine` (published from the `Fit3xGen` repo's
-`ts-package/`). `/v1` currently speaks **engine 1.3.0 / contract v3.0.0**.
+`ts-package/`). `/v1` currently speaks **engine 1.3.3 / contract v3.0.0**.
 
 | Route                      | Engine call            |
 |----------------------------|------------------------|
@@ -78,15 +78,13 @@ The API wraps `@fit3x/workout-engine` (published from the `Fit3xGen` repo's
 | `GET /v1/options`          | `get*Options`          |
 | `GET /v1/exercises`        | `getExercises`         |
 
-> **Blocked: engine 1.3.0 cannot generate on Workers as published.**
-> `generateWorkout` → `validateInput` calls `ajv.compile()`, which builds a
-> validator with `new Function`. Cloudflare Workers forbid runtime code
-> generation, so the first generate call fails with
-> `EvalError: Code generation from strings disallowed for this context`.
-> Catalog routes (`/v1/programs`, `/v1/sessions/catalog`,
-> `/v1/sessions/coverage`, `/v1/options`, `/v1/exercises`) are unaffected.
-> Fix belongs in Fit3xGen — precompile the schema with ajv's standalone mode
-> so no validator is built at runtime. See "Verifying an engine upgrade".
+> Engine 1.3.0 could not generate on Workers: `generateWorkout` →
+> `validateInput` called `ajv.compile()`, which builds a validator with
+> `new Function`, and Cloudflare Workers forbid runtime code generation — every
+> generate call failed with `EvalError: Code generation from strings disallowed
+> for this context` (surfaced to clients as a 422 `unprocessable_entity`).
+> Fixed by precompiling the input contract with ajv's standalone mode at build
+> time, shipped in engine **1.3.3**. Stay on 1.3.3 or later.
 
 ### Upgrading the engine
 
@@ -117,7 +115,7 @@ malformed payload reaching a client.
 `@cloudflare/vitest-pool-workers` runs workerd with an `unsafeEval` binding
 that production does **not** have. Anything the engine does with `eval` or
 `new Function` therefore passes in Vitest and fails once deployed — which is
-exactly how the ajv issue above hides.
+exactly how the ajv issue above stayed hidden until it hit `wrangler dev`.
 
 So after any engine bump, exercise generation through a real isolate:
 
