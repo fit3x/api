@@ -134,7 +134,9 @@ describe('catalog ETags', () => {
 
   it('rejects an oversized filter list instead of inflating the header', async () => {
     const many = Array.from({ length: 200 }, () => 'barbell').join(',')
-    const res = await get(`/v1/programs?available_equipment=${many}`)
+    const res = await get(
+      `/v1/programs?gender=male&available_equipment=${many}`,
+    )
     expect(res.status).toBe(400)
   })
 })

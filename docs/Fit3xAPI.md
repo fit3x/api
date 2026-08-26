@@ -231,7 +231,25 @@ Single exercise by ID. Cacheable.
 
 Workout program catalog (templates + session-input defaults). Cacheable.
 
-- `ETag: "programs-{engineVersion}"`, `Cache-Control: public, max-age=3600`.
+- `ETag: "programs-{engineVersion}-{locale}-{filters}"`,
+  `Cache-Control: private, max-age=3600`.
+
+**Query parameters**
+
+| Param | Required | Values |
+| --- | --- | --- |
+| `gender` | **yes** | `male` \| `female` |
+| `locale` | no (default `en`) | `en` \| `es` \| `pt-BR` \| `fr` |
+| `goals` | no | CSV of `get_stronger`, `build_muscle`, `lose_fat`, `improve_general_fitness` |
+| `days_per_week` | no | int 1–7 |
+| `session_duration_minutes` | no | int 10–180 |
+| `available_equipment` | no | CSV of equipment IDs |
+| `difficulty_level` | no | `beginner` \| `intermediate` \| `advanced` |
+| `focus_body_parts` | no | CSV of body-part IDs |
+
+`gender` is required: the catalog is gender-partitioned, so an unfiltered call
+would return the entire index. Omitting it returns `400 bad_request` with
+`error.issues[].path = ["gender"]`. List filters accept at most 64 entries.
 
 **`200 OK`**
 

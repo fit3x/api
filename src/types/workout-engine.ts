@@ -320,7 +320,9 @@ const intQuery = (min: number, max: number) =>
 
 export const ProgramsQuerySchema = z.object({
   locale: SupportedLocaleSchema.default('en'),
-  gender: BiologicalSexSchema.optional(),
+  /** Required: the catalog is gender-partitioned, and returning both halves
+   *  ships the whole 240-entry index when a client can only use half of it. */
+  gender: BiologicalSexSchema,
   goals: csvOf(UserGoalSchema).optional(),
   days_per_week: intQuery(1, 7).optional(),
   session_duration_minutes: intQuery(10, 180).optional(),

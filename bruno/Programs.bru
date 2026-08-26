@@ -38,6 +38,9 @@ docs {
     duration_weeks, days_per_week
   
   `id` is what you send as generation_request.program_id to pin a program.
-  Optional filters are disabled by default (~ prefix); list filters are
-  comma-separated.
+
+  `gender` (male|female) is REQUIRED — the catalog is gender-partitioned and
+  omitting it returns 400 bad_request with issues[].path = ["gender"]. The
+  remaining filters are optional and disabled by default (~ prefix); list
+  filters are comma-separated.
 }

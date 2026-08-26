@@ -89,11 +89,38 @@ describe('GET /v1/programs', () => {
     expect(body.error?.code).toBe('unauthorized')
   })
 
-  it('returns 200 with the v1.3.0 program catalog', async () => {
+  it('returns 400 when gender is omitted', async () => {
     const token = await mintToken()
     const res = await callPrograms({
       headers: { Authorization: `Bearer ${token}` },
     })
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as {
+      error?: { code?: string; issues?: Array<{ path: unknown[] }> }
+    }
+    expect(body.error?.code).toBe('bad_request')
+    expect(body.error?.issues).toContainEqual(
+      expect.objectContaining({ path: ['gender'] }),
+    )
+  })
+
+  it('returns 400 for an unsupported gender value', async () => {
+    const token = await mintToken()
+    const res = await callPrograms(
+      { headers: { Authorization: `Bearer ${token}` } },
+      '/v1/programs?gender=other',
+    )
+    expect(res.status).toBe(400)
+    const body = (await res.json()) as { error?: { code?: string } }
+    expect(body.error?.code).toBe('bad_request')
+  })
+
+  it('returns 200 with the v1.3.0 program catalog', async () => {
+    const token = await mintToken()
+    const res = await callPrograms(
+      { headers: { Authorization: `Bearer ${token}` } },
+      '/v1/programs?gender=male',
+    )
     expect(res.status).toBe(200)
     const body = (await res.json()) as {
       version: string
@@ -117,6 +144,9 @@ describe('GET /v1/programs', () => {
     expect(body.count).toBeGreaterThan(0)
     expect(body.programs.length).toBe(body.count)
     expect(typeof body.requestId).toBe('string')
+    for (const p of body.programs) {
+      expect(p.gender).toBe('male')
+    }
 
     const first = body.programs[0]!
     // `id` is what a client sends back as generation_request.program_id.
@@ -158,7 +188,7 @@ describe('GET /v1/programs', () => {
     const token = await mintToken()
     const res = await callPrograms(
       { headers: { Authorization: `Bearer ${token}` } },
-      '/v1/programs?goals=improve_mobility',
+      '/v1/programs?gender=male&goals=improve_mobility',
     )
     expect(res.status).toBe(400)
     const body = (await res.json()) as { error?: { code?: string } }
