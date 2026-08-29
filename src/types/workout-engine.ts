@@ -286,6 +286,9 @@ export const ProgramListEntrySchema = z.object({
   focus_body_parts: z.array(BodyPartIdSchema),
   duration_weeks: z.number().int(),
   days_per_week: z.number().int(),
+  /** The exercises that most define the program (at most 5), most-representative
+   *  first. Ids resolve via `GET /v1/exercises` — intended for program-card media. */
+  top_exercise_ids: z.array(z.string()).max(5),
 })
 export type ProgramListEntryDTO = z.infer<typeof ProgramListEntrySchema>
 

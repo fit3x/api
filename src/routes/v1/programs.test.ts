@@ -137,6 +137,7 @@ describe('GET /v1/programs', () => {
         max_session_duration_minutes: number
         focus_body_parts: string[]
         duration_weeks: number
+        top_exercise_ids: string[]
       }>
       requestId: string
     }
@@ -159,6 +160,14 @@ describe('GET /v1/programs', () => {
     )
     expect(typeof first.duration_weeks).toBe('number')
     expect(Array.isArray(first.focus_body_parts)).toBe(true)
+    // Engine >=1.3.4 exposes the program-card exercises; the output schema
+    // must declare them or Zod strips the key on the way out.
+    expect(Array.isArray(first.top_exercise_ids)).toBe(true)
+    expect(first.top_exercise_ids.length).toBeGreaterThan(0)
+    expect(first.top_exercise_ids.length).toBeLessThanOrEqual(5)
+    for (const id of first.top_exercise_ids) {
+      expect(typeof id).toBe('string')
+    }
 
     // v1.2.x shape is gone.
     expect(first).not.toHaveProperty('template')
