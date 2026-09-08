@@ -115,7 +115,7 @@ export const MovementPatternIdSchema = z.enum([
   'vertical_push',
 ])
 
-/** The 10-value body-part vocabulary — v3's `constraints.body_parts`. This
+/** The 11-value body-part vocabulary — v3's `constraints.body_parts`. This
  *  replaced v2's `target_muscle_groups` / `required_body_parts`. */
 export const BodyPartIdSchema = z.enum([
   'abs',
@@ -124,6 +124,7 @@ export const BodyPartIdSchema = z.enum([
   'cardio',
   'chest',
   'forearms',
+  'gluteus',
   'legs',
   'plyometrics',
   'shoulders',

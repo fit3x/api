@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@fit3x/workout-engine':
-        specifier: ^1.3.5
-        version: 1.3.5
+        specifier: ^1.3.6
+        version: 1.3.6
       '@hono/zod-openapi':
         specifier: ^1.6.3
         version: 1.6.3(hono@4.13.7)(zod@4.5.4)
@@ -299,8 +299,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fit3x/workout-engine@1.3.5':
-    resolution: {integrity: sha512-d0F9rH6JwyICfQmyIFrPNClY8dZLbHLmxh99CIKyHfrABPvrxv+xiB2KrytU9E+2PKLXmmrPAhMxOLgMz2N3Ew==, tarball: https://npm.pkg.github.com/download/@fit3x/workout-engine/1.3.5/c3ff9b0b39326cb8513518a48682b42d35f02dfb}
+  '@fit3x/workout-engine@1.3.6':
+    resolution: {integrity: sha512-2X5EBYoz+HvPevBUWzOv81rJr+RAxsyBdgZr2gEyZMTkWy/bwFd25c1zPu+nC9rVcgmHPgpb1SkH+dSLtGJfvQ==, tarball: https://npm.pkg.github.com/download/@fit3x/workout-engine/1.3.6/b14ca378a7e2d16ad89576d7cecebafa59ac7b13}
     engines: {node: '>=18'}
 
   '@hono/zod-openapi@1.6.3':
@@ -1338,7 +1338,7 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@fit3x/workout-engine@1.3.5': {}
+  '@fit3x/workout-engine@1.3.6': {}
 
   '@hono/zod-openapi@1.6.3(hono@4.13.7)(zod@4.5.4)':
     dependencies:

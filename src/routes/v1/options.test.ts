@@ -81,8 +81,11 @@ describe('GET /v1/options', () => {
       'lose_fat',
       'improve_general_fitness',
     ])
-    // constraints.body_parts is the 10-value body-part vocabulary.
-    expect((body.bodyParts as unknown[]).length).toBe(10)
+    // constraints.body_parts is the 11-value body-part vocabulary.
+    const bodyParts = body.bodyParts as Array<{ value: string }>
+    expect(bodyParts.length).toBe(11)
+    // gluteus landed in engine 1.3.6 — data catalog and input vocabulary both.
+    expect(bodyParts.map((b) => b.value)).toContain('gluteus')
   })
 
   it.each(['en', 'es', 'pt-BR', 'fr'])(
